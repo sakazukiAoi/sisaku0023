@@ -83,8 +83,8 @@ input[type="range"] {
 
 <body>
   <div class="container">
-    <h1>5分タイマー</h1>
-    <li><a href="index.html">ホーム</a></li>
+    <h2 id="current-time">--:--:--</h2>
+    <a href="index.html">ホーム</a>
 
     <div class="timer-display">
       <svg class="progress-ring" width="120" height="120">
@@ -108,7 +108,21 @@ input[type="range"] {
   <script src="script.js"></script>
 </body>
 
-  <script>const timeText = document.getElementById('time');
+  <script>
+//現在時刻
+function updateCurrentTime() {
+  const now = new Date();
+  const hh = now.getHours().toString().padStart(2, '0');
+  const mm = now.getMinutes().toString().padStart(2, '0');
+  const ss = now.getSeconds().toString().padStart(2, '0');
+  document.getElementById('current-time').textContent = `${hh}:${mm}:${ss}`;
+}
+
+setInterval(updateCurrentTime, 1000);
+updateCurrentTime(); // 初回呼び出し
+
+//タイマー
+const timeText = document.getElementById('time');
 const stopBtn = document.getElementById('stopBtn');
 const volumeSlider = document.getElementById('volume');
 const alarm = document.getElementById('alarm');
