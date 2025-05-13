@@ -83,7 +83,7 @@ input[type="range"] {
 
 <body>
   <div class="container">
-    <h1>5分タイマー</h1>
+    <h2 id="current-time">--:--:--</h2>
     <li><a href="sub.html">サブページ</a></li>
 
     <div class="timer-display">
@@ -109,6 +109,19 @@ input[type="range"] {
 </body>
 
   <script>
+//現在時刻
+function updateCurrentTime() {
+  const now = new Date();
+  const hh = now.getHours().toString().padStart(2, '0');
+  const mm = now.getMinutes().toString().padStart(2, '0');
+  const ss = now.getSeconds().toString().padStart(2, '0');
+  document.getElementById('current-time').textContent = `${hh}:${mm}:${ss}`;
+}
+
+setInterval(updateCurrentTime, 1000);
+updateCurrentTime(); // 初回呼び出し
+
+//タイマー    
 const timeText = document.getElementById('time');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
