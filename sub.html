@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>5分タイマー</title>
+  <style>
+    body {
+  font-family: sans-serif;
+  background: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  text-align: center;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  width: 300px;
+}
+
+.timer-display {
+  position: relative;
+  margin: 1rem auto;
+  width: 120px;
+  height: 120px;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+}
+
+.ring-bg {
+  fill: none;
+  stroke: #e6e6e6;
+  stroke-width: 8;
+}
+
+.ring-progress {
+  fill: none;
+  stroke: #4caf50;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 339.292;
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+}
+
+.time-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.controls button {
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.controls button:hover {
+  background-color: #388e3c;
+}
+
+input[type="range"] {
+  width: 100%;
+  margin-top: 1rem;
+}
+</style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>5分タイマー</h1>
+    <li><a href="index.html">ホーム</a></li>
+
+    <div class="timer-display">
+      <svg class="progress-ring" width="120" height="120">
+        <circle class="ring-bg" cx="60" cy="60" r="54" />
+        <circle class="ring-progress" cx="60" cy="60" r="54" />
+      </svg>
+      <div class="time-text" id="time">05:00</div>
+    </div>
+
+    <input type="range" id="volume" min="0" max="1" step="0.01" value="0.5" />
+    <label for="volume">音量</label>
+
+    <div class="controls">
+      <button id="startBtn">スタート</button>
+      <button id="stopBtn">ストップ</button>
+    </div>
+
+    <audio id="alarm" src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg" preload="auto"></audio>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+  <script>const timeText = document.getElementById('time');
+const stopBtn = document.getElementById('stopBtn');
+const volumeSlider = document.getElementById('volume');
+const alarm = document.getElementById('alarm');
+const ring = document.querySelector('.ring-progress');
+
+const FULL_DASH_ARRAY = 339.292;
+let interval = null;
+let running = true;
+alarm.volume = volumeSlider.value;
+
+volumeSlider.addEventListener('input', () => {
+  alarm.volume = volumeSlider.value;
+});
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60).toString().padStart(2, '0');
+  const s = (sec % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function updateProgress(secondsLeft) {
+  const progress = FULL_DASH_ARRAY * (secondsLeft / 300);
+  ring.style.strokeDashoffset = FULL_DASH_ARRAY - progress;
+}
+
+function getSecondsSinceMidnight() {
+  const now = new Date();
+  return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+}
+
+function getNextAlarmIn() {
+  const elapsed = getSecondsSinceMidnight();
+  const nextIn = 300 - (elapsed % 300);
+  return nextIn === 300 ? 0 : nextIn;
+}
+
+function startAccurateTimer() {
+  if (interval) clearInterval(interval);
+  let remaining = getNextAlarmIn();
+  updateUI(remaining);
+
+  interval = setInterval(() => {
+    if (!running) return;
+
+    remaining--;
+
+    if (remaining <= 0) {
+      alarm.play();
+      remaining = 300;
+    }
+
+    updateUI(remaining);
+  }, 1000);
+}
+
+function stopTimer() {
+  running = false;
+  clearInterval(interval);
+}
+
+function updateUI(seconds) {
+  timeText.textContent = formatTime(seconds);
+  updateProgress(seconds);
+}
+
+stopBtn.addEventListener('click', stopTimer);
+
+startAccurateTimer(); // 自動開始
+
+</script>
+</html>
